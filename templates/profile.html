@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  <p>Welcome, {{ name }}!</p>
+  {% if passwords %}
+  <p>Your passwords:</p>
+  {% endif %}
+</form>
+</h1>
+
+{% if passwords %}
+<ul style="list-style: disc">
+{% for password in passwords %}
+  <li>{{ password.name }} - {{ password.password }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if shared_passwords %}
+<p>Passwords shared with you:</p>
+<div style="width: fit-content;margin-left: auto;margin-right: auto;">
+  <ul style="list-style: disc; text-align: left;">
+    {% for password_obj in shared_passwords %}
+    <li>Password(s) from <b>{{ password_obj.user_name }} </b> </li>
+    <ul style="list-style: disc; text-align: left; margin-left:30px">
+      {% for password in password_obj.passwords %}
+      <li> Password to: <b> {{ password.name }} </b> - <i> {{password.password}} </i> </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+{% endblock %}
