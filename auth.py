@@ -68,9 +68,9 @@ def signup_post():
     if(not re.fullmatch(regex, email)):
         error = 'Incorrect email!'
         return render_template('signup.html', error=error)
-    allowed = set(string.ascii_letters + string.digits + '.')
+    allowed = set(string.ascii_letters + string.digits + '.' + ' ')
     if(not set(name) <= allowed):
-        error = 'Name can only contain letters and digits!'
+        error = 'Name can only contain letters, digits and space!'
         return render_template('signup.html', error=error)
     if(password != password_match):
         error = 'Passwords don\'t match!'
