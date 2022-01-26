@@ -1,4 +1,6 @@
 from ast import Pass
+import random
+import string
 import time
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
@@ -8,6 +10,10 @@ from .models import Password, User, Shared_passwords
 import sys
 from sqlalchemy.orm import Session
 from .auth import hash_password, check_password
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 
 main = Blueprint('main', __name__)
 
@@ -38,6 +44,13 @@ def decryptAES(userId, password):
         iv = User.query.filter_by(id=userId).first().password[-16:].encode('utf-8')
         aes = AES.new(key, AES.MODE_CBC, iv)
         return aes.decrypt(decrypted_1).decode('utf-8').replace("+", "")
+
+def reencrypt_passwords(userId, userSalt, new_password):
+    for password in Password.query.filter_by(userId = userId).all():
+        password.password = decryptAES(userId, password.password)
+    current_user.password = hash_password(new_password, userSalt)
+    for password in Password.query.filter_by(userId = userId).all():
+        password.password = encryptAES(userId, password.password.encode('utf-8'))
 
 @main.route('/')
 def index():
@@ -111,10 +124,27 @@ def change_password_post():
     if(not check_password(password_new)):
         flash('Password needs to be at least 8 characters and include at least one: uppercase letter, lowecase letter, digit and [!, @, #, $, %, ^, &, *]')
         return redirect(url_for('main.change_password'))
-    for password in Password.query.filter_by(userId = current_user.id).all():
-        password.password = decryptAES(current_user.id, password.password)
-    current_user.password = hash_password(password_new, current_user.salt)
-    for password in Password.query.filter_by(userId = current_user.id).all():
-        password.password = encryptAES(current_user.id, password.password.encode('utf-8'))
+    reencrypt_passwords(current_user.id, current_user.salt, password_new)
     db.session.commit()
     return redirect(url_for('main.profile'))
+
+@main.route('/generate_code')
+def generate_code():
+    return render_template('generate_code.html')
+
+@main.route('/generate_code', methods=['POST'])
+def generate_code_post():
+    email = request.form.get('email')
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        time.sleep(2)
+        flash('No user with email: ' + email)
+        return redirect(url_for('main.generate_code'))
+    gen_code = str(user.id) + ''.join(random.sample(string.ascii_letters + string.digits, 20 - len(str(user.id))%20))
+    now = datetime.now()
+    delta = timedelta(hours=2)
+    time_until = now + delta
+    time_until = time_until.strftime("%d-%m-%Y %H:%M:%S")
+    mail_content = 'Your recovery code: ' + gen_code + ', code valid until ' + time_until
+    print('Code length ' + str(len(gen_code)), file=sys.stderr)
+    return redirect(url_for('main.generate_code'))

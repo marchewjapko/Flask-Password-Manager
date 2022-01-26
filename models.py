@@ -18,3 +18,9 @@ class Password(db.Model):
     userId = db.Column(db.Integer)
     name = db.Column(db.String(1000))
     password = db.Column(db.String(1000))
+
+class Recovery_code(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.Integer)
+    code = db.Column(db.String(20))
+    validThrough = db.Column(db.String(19))
