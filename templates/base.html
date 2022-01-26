@@ -66,6 +66,11 @@
                                 I forgot my password
                             </a>
                             {% endif %}
+                            {% if not current_user.is_authenticated %}
+                            <a href="{{ url_for('main.recover_password') }}" class="navbar-item">
+                                Recover password with code
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
