@@ -115,4 +115,7 @@ dmypy.json
 
 # Helpers
 Help
+Email
+email_credentials.py
+db.sqlite
 *.ods*
