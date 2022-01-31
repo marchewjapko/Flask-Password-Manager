@@ -14,7 +14,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
-from email_credentials import get_email, get_email_password
+from .email_credentials import get_email, get_email_password #Sectret file ooooooo
 
 main = Blueprint('main', __name__)
 
@@ -152,8 +152,8 @@ def generate_code_post():
     db.session.add(recovery_code)
     db.session.commit()
     mail_content = 'Your recovery code: ' + gen_code + '\nCode valid until ' + time_until
-    sender_address = get_email
-    sender_pass = get_email_password
+    sender_address = get_email()
+    sender_pass = get_email_password()
     receiver_address = user.email
     message = MIMEMultipart()
     message['From'] = sender_address

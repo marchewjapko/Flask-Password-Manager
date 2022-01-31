@@ -46,6 +46,11 @@ def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if(not re.fullmatch(regex, email)):
+        time.sleep(2)
+        flash('Please check your login details and try again.')
+        return redirect(url_for('auth.login'))
     user = User.query.filter_by(email=email).first()
     if not user or not user.password == hash_password(password, user.salt) or not check_password(password):
         time.sleep(2)
